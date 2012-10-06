@@ -1,4 +1,4 @@
-module Pwstore.Pwgen where
+module Pwstore.Pwgen (pwgen, pwgend) where
 
 import System.Random
 
