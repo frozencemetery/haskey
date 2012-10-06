@@ -1,0 +1,14 @@
+Name:           pwstore
+Version:        0.5
+Synopsis:       Password management
+Author:         frozencemetery
+Maintainer:     rharwood@club.cc.cmu.edu
+Category:       Utilities
+Build-type:     Simple
+Cabal-version:  >=1.2
+
+Executable pwstore
+  Main-Is:              main.hs
+  Hs-Source-Dirs:       .
+  Build-Depends:        base, random, xtest
+  Extensions:           

@@ -1,4 +1,4 @@
-module Pwstore.Storage (listEntries,get,add) where
+module Storage (listEntries,get,add) where
 
 import Data.List
 import System.IO
@@ -35,12 +35,10 @@ writeDB db = do
   hPutStrLn h $ show db
   hClose h
 
-
 openDB :: IO DB
 openDB = do
   -- cons <- readFile dblocat
   -- return $ read cons
   h <- openFile dblocat ReadMode
   db <- hGetContents h
-  hClose h
   return $ read db
