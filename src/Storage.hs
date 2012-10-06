@@ -27,10 +27,17 @@ listEntries = do
   db <- openDB
   return $ map fst db
 
-get :: String -> IO (Maybe (String, String))
-get s = do
+get :: Maybe String -> (Maybe String, Maybe String) -> IO (Maybe (String, (String, String)))
+get s (u,p) = do
   db <- openDB
-  return $ s `lookup` db
+  let sf x = case s of Nothing -> True ; Just k -> k == x
+  let uf y = case u of Nothing -> True ; Just k -> k == y
+  let pf z = case p of Nothing -> True ; Just k -> k == z
+  let db' = filter (\(x,(y,z)) -> sf x && uf y && pf z) db
+  let ret = case length db' of
+              1 -> Just $ head db'
+              _ -> Nothing
+  return ret
 
 -- the Bool represents sharing
 -- by which I mean whether it overwrote
