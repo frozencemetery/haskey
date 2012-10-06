@@ -9,6 +9,19 @@ dblocat = "/home/frozencemetery/.pw.db"
 -- (service, (username, password))
 type DB = [(String, (String, String))]
 
+writeDB :: DB -> IO ()
+writeDB db = do
+  handle <- openFile dblocat WriteMode
+  hPutStr handle $ show db
+  hClose handle
+
+openDB :: IO DB
+openDB = do
+  handle <- openFile dblocat ReadMode
+  cont <- hGetLine handle
+  hClose handle
+  return $ read cont
+
 listEntries :: IO [String]
 listEntries = do
   db <- openDB
@@ -28,16 +41,3 @@ add s r = do
   let newdb = (s, r) : db'
   writeDB newdb
   return $ length b == 1
-
-writeDB :: DB -> IO ()
-writeDB db = do
-  handle <- openFile dblocat WriteMode
-  hPutStr handle $ show db
-  hClose handle
-
-openDB :: IO DB
-openDB = do
-  handle <- openFile dblocat ReadMode
-  cont <- hGetLine handle
-  hClose handle
-  return $ read cont
