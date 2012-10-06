@@ -30,15 +30,9 @@ add s r = do
   return $ length b == 1
 
 writeDB :: DB -> IO ()
-writeDB db = do
-  h <- openFile dblocat WriteMode
-  hPutStrLn h $ show db
-  hClose h
+writeDB db = writeFile dblocat $ show db
 
 openDB :: IO DB
 openDB = do
-  -- cons <- readFile dblocat
-  -- return $ read cons
-  h <- openFile dblocat ReadMode
-  db <- hGetContents h
-  return $ read db
+  cons <- readFile dblocat
+  return $ read cons
