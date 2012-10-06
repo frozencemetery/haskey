@@ -52,9 +52,9 @@ add s r = do
 del :: Maybe String -> (Maybe String, Maybe String) -> IO Bool
 del s (u,p) = do
   db <- openDB
-  let sf x = case s of Nothing -> True ; Just k -> k == x
-  let uf y = case u of Nothing -> True ; Just k -> k == y
-  let pf z = case p of Nothing -> True ; Just k -> k == z
+  let sf x = case s of Nothing -> True ; Just k -> k /= x
+  let uf y = case u of Nothing -> True ; Just k -> k /= y
+  let pf z = case p of Nothing -> True ; Just k -> k /= z
   let db' = filter (\(x,(y,z)) -> sf x && uf y && pf z) db
-  writeDB $ db \\ db'
-  return $ length db' > 0
+  writeDB db'
+  return $ length db - length db' > 0
