@@ -8,7 +8,7 @@ Build-type:     Simple
 Cabal-version:  >=1.2
 
 Executable pwstore
-  Main-Is:              main.hs
+  Main-Is:              Main.hs
   Hs-Source-Dirs:       .
   Build-Depends:        base, random, xtest
   Extensions:           
