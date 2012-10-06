@@ -15,7 +15,7 @@ pwgen g i =
   in p g i ""
 
 pwgend :: (RandomGen g) => g -> (String, g)
-pwgend = \g -> pwgen g 128
+pwgend g = pwgen g 128
 
 -- For testing purposes only
 main = do
