@@ -1,4 +1,4 @@
-module Pwgen (pwgen, pwgend) where
+module Pwgen (pwgen) where
 
 import System.Random
 
@@ -14,10 +14,7 @@ pwgen g i =
         where (n, g') = randomR (0, length(srcstring)-1) g
   in p g i ""
 
-pwgend :: (RandomGen g) => g -> (String, g)
-pwgend g = pwgen g 128
-
 -- For testing purposes only
 main = do
   r <- newStdGen
-  putStrLn $ fst $ pwgend r
+  putStrLn $ fst $ pwgen r 128
