@@ -47,11 +47,11 @@ get s u p = do
 
 -- the Bool represents sharing
 -- by which I mean whether it overwrote
-add :: String -> (String, String) -> IO Bool
-add s r = do
+add :: String -> String -> String -> IO Bool
+add s u p = do
   db <- openDB
   let (b, db') = partition (\x -> fst x == s) db
-  let newdb = (s, r) : db'
+  let newdb = (s, (u, p)) : db'
   writeDB newdb
   return $ length b == 1
 
