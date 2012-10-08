@@ -1,9 +1,6 @@
 default: pwstore
 
-configure:
-	runhaskell Setup.hs configure
-
-pwstore: configure
+pwstore:
 	runhaskell Setup.hs build
 
 clean:
