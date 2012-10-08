@@ -3,11 +3,8 @@ import Storage
 import System.Console.GetOpt
 import System.Environment
 import Data.Maybe
-import Prelude hiding (print)
-import System.IO (hPutStrLn, stdout)
-
-print :: String -> IO ()
-print = hPutStrLn stdout
+import Prelude
+import System.IO.Unsafe (unsafePerformIO)
 
 version = "0.5hg"
 
