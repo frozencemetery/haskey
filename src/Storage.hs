@@ -1,4 +1,4 @@
-module Storage (listEntries,get,add) where
+module Storage (listEntries, get, add, showdbent) where
 
 import Data.List
 import System.IO
@@ -7,7 +7,12 @@ dblocat :: String
 dblocat = "/home/frozencemetery/.pw.db"
 
 -- (service, (username, password))
-type DB = [(String, (String, String))]
+type DBent = (String, (String, String))
+type DB = [DBent]
+
+showdbent :: DBent -> String
+showdbent (s, (u,p)) = 
+  concat ["Service:  ", s, "\nUsername: ", u, "\nPassword: ", p]
 
 writeDB :: DB -> IO ()
 writeDB db = do
@@ -28,8 +33,8 @@ listEntries = do
   let db' = concat $ intersperse "\n" $ map fst db
   return db'
 
-get :: Maybe String -> (Maybe String, Maybe String) -> IO (Maybe (String, (String, String)))
-get s (u,p) = do
+get :: Maybe String -> Maybe String -> Maybe String -> IO (Maybe DBent)
+get s u p = do
   db <- openDB
   let sf x = case s of Nothing -> True ; Just k -> k == x
   let uf y = case u of Nothing -> True ; Just k -> k == y
@@ -50,8 +55,8 @@ add s r = do
   writeDB newdb
   return $ length b == 1
 
-del :: Maybe String -> (Maybe String, Maybe String) -> IO Bool
-del s (u,p) = do
+del :: Maybe String -> Maybe String -> Maybe String -> IO Bool
+del s u p = do
   db <- openDB
   let sf x = case s of Nothing -> True ; Just k -> k /= x
   let uf y = case u of Nothing -> True ; Just k -> k /= y

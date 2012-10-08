@@ -8,32 +8,28 @@ import System.IO
 
 version = "0.5hg"
 
+data Action = Create | Lookup | Delete | List
+
 data Options = Options { optShowVersion :: Bool
                        , optShowLicense :: Bool
-                       , optLookup :: Bool
-                       , optCreate :: Bool
-                       , optList :: Bool
                        , optServicename :: Maybe String
                        , optUsername :: Maybe String
                        , optPassword :: Maybe String
                        , optGenPw :: Maybe Int
                        , optGenUser :: Maybe Int
-                       , optDelete :: Bool
+                       , optAction :: Maybe Action
                        -- , optDBlocat :: FilePath
                        }
 
 defaultOptions :: Options
 defaultOptions = Options { optShowVersion = False
                          , optShowLicense = False
-                         , optLookup = False
-                         , optCreate = False
-                         , optList = False
                          , optServicename = Nothing
                          , optUsername = Nothing
                          , optPassword = Nothing
                          , optGenPw = Nothing
                          , optGenUser = Nothing
-                         , optDelete = False
+                         , optAction = Nothing
                          -- , optDBlocat = "/home/frozencemetery/.pw.db"
                          }
 
@@ -45,13 +41,13 @@ options = [ Option ['v'] ["version"]
                      (NoArg (\opts -> opts { optShowLicense = True }))
                      "Print license (GPLv3) information"
           , Option ['L'] ["lookup"]
-                     (NoArg (\opts -> opts { optLookup = True }))
+                     (NoArg (\opts -> opts { optAction = Just Lookup }))
                      "Perform a username/password lookup"
           , Option ['c'] ["create"]
-                     (NoArg (\opts -> opts { optCreate = True }))
+                     (NoArg (\opts -> opts { optAction = Just Create }))
                      "Create a new entry (overwriting any duplicate)"
           , Option [] ["list"]
-                     (NoArg (\opts -> opts { optList = True }))
+                     (NoArg (\opts -> opts { optAction = Just List }))
                      "List the service names of all entries"
           , Option ['s'] ["service"]
                      (OptArg ((\f opts -> opts { optServicename = Just f }) . fromMaybe "debian") "SERVICENAME")
@@ -69,7 +65,7 @@ options = [ Option ['v'] ["version"]
                      (OptArg ((\f opts -> opts { optGenUser = Just $ read f }) . fromMaybe "128") "NAMELENGTH")
                      "desired length of username (defaults to 128)"
           , Option [] ["delete"] -- do not bind a shortarg to this command
-                     (NoArg (\opts -> opts { optDelete = True }))
+                     (NoArg (\opts -> opts { optAction = Just Delete }))
                      "delete an entry"
           -- , Option ['d'] ["dblocat"]
           --            (OptArg ((\f opts -> opts { optDBlocat = f}) . fromMaybe "/home/frozencemetery/.pw.db") "FILE")
@@ -89,5 +85,17 @@ main = do
   (opts, trash) <- compilerOpts args
   if optShowVersion opts then print version else return ()
   if optShowLicense opts then print "GPLv3 motherfuckers!" else return ()
-  if optList opts then do entries <- listEntries; hPutStrLn stdout entries else return ()
+  case optAction opts of
+    Nothing -> return ()
+    Just List -> 
+      do entries <- listEntries 
+         hPutStrLn stdout entries
+         return ()
+    Just Lookup -> 
+      do entry <- get (optServicename opts) (optUsername opts) (optPassword opts)
+         let entry' = fromMaybe "no entry found" (showdbent `fmap` entry)
+         hPutStrLn stdout entry'
+         return ()
+    Just Create -> return ()
+    Just Delete -> return ()
   return ()
