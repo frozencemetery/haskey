@@ -5,6 +5,7 @@ import System.Environment
 import Data.Maybe
 import Prelude
 import System.IO
+import Control.Monad
 
 version = "0.5hg"
 
@@ -83,23 +84,23 @@ main :: IO ()
 main = do
   args <- getArgs
   (opts, trash) <- compilerOpts args
-  if optShowVersion opts then print version else return ()
-  if optShowLicense opts then print "GPLv3 motherfuckers!" else return ()
+  when (optShowVersion opts) $ print version
+  when (optShowLicense opts) $ print "GPLv3 motherfuckers!"
   case optAction opts of
     Nothing -> return ()
     Just List -> 
       do entries <- listEntries 
-         hPutStrLn stdout entries
+         putStrLn entries
          return ()
     Just Lookup -> 
       do entry <- get (optServicename opts) (optUsername opts) (optPassword opts)
-         let entry' = fromMaybe "no entry found" (showdbent `fmap` entry)
-         hPutStrLn stdout entry'
+         let entry' = maybe "no entry found" showdbent entry
+         putStrLn entry'
          return ()
     Just Create -> return ()
     Just Delete -> 
       do killp <- del (optServicename opts) (optUsername opts) (optPassword opts)
-         case killp of True -> hPutStrLn stdout "Deleted."
-                       False -> hPutStrLn stdout "No entries matched to delete."
+         case killp of True -> putStrLn "Deleted."
+                       False -> putStrLn "No entries matched to delete."
          return ()
   return ()

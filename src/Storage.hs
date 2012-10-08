@@ -30,7 +30,7 @@ openDB = do
 listEntries :: IO String
 listEntries = do
   db <- openDB
-  let db' = concat $ intersperse "\n" $ map fst db
+  let db' = intercalate "\n" $ map fst db
   return db'
 
 get :: Maybe String -> Maybe String -> Maybe String -> IO (Maybe DBent)

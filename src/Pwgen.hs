@@ -11,7 +11,7 @@ pwgen g i =
   let p :: (RandomGen g) => g -> Int -> String -> (String, g)
       p g 0 acc = (acc, g)
       p g i acc = p g' (i-1) (srcstring !! n : acc) 
-        where (n, g') = randomR (0, length(srcstring)-1) g
+        where (n, g') = randomR (0, length srcstring - 1) g
   in p g i ""
 
 -- For testing purposes only
