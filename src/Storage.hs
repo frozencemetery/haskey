@@ -1,4 +1,4 @@
-module Storage (listEntries, get, add, showdbent) where
+module Storage (listEntries, get, add, del, showdbent) where
 
 import Data.List
 import System.IO

@@ -97,5 +97,9 @@ main = do
          hPutStrLn stdout entry'
          return ()
     Just Create -> return ()
-    Just Delete -> return ()
+    Just Delete -> 
+      do killp <- del (optServicename opts) (optUsername opts) (optPassword opts)
+         case killp of True -> hPutStrLn stdout "Deleted."
+                       False -> hPutStrLn stdout "No entries matched to delete."
+         return ()
   return ()
