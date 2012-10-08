@@ -7,8 +7,8 @@ data Action = Create | Lookup | Delete | List
 
 data Options = Options { optShowVersion :: Bool
                        , optShowLicense :: Bool
-                       , optServicename :: Maybe String
-                       , optUsername :: Maybe String
+                       , optService :: Maybe String
+                       , optUser :: Maybe String
                        , optPassword :: Maybe String
                        , optGenPw :: Maybe Int
                        , optGenUser :: Maybe Int
@@ -19,8 +19,8 @@ data Options = Options { optShowVersion :: Bool
 defaultOptions :: Options
 defaultOptions = Options { optShowVersion = False
                          , optShowLicense = False
-                         , optServicename = Nothing
-                         , optUsername = Nothing
+                         , optService = Nothing
+                         , optUser = Nothing
                          , optPassword = Nothing
                          , optGenPw = Nothing
                          , optGenUser = Nothing
@@ -45,39 +45,39 @@ options = [ Option ['v'] ["version"]
                      (NoArg (\opts -> opts { optAction = Just List }))
                      "List the service names of all entries"
           , Option ['s'] ["service"]
-                     (OptArg ((\f opts -> opts { optServicename = Just f }) 
+                     (OptArg ((\f opts -> opts { optService = Just f })
                               . fromMaybe "debian") "SERVICENAME")
                      "name of service"
           , Option ['u'] ["username"]
-                     (OptArg ((\f opts -> opts { optUsername = Just f }) 
+                     (OptArg ((\f opts -> opts { optUser = Just f })
                               . fromMaybe "frozencemetery") "USERNAME")
                      "name of user"
           , Option ['p'] ["password"]
-                     (OptArg ((\f opts -> opts { optPassword = Just f }) 
+                     (OptArg ((\f opts -> opts { optPassword = Just f })
                               . fromMaybe "hunter2") "PASSWORD")
                      "password to use"
           , Option ['P'] ["genpw"]
-                     (OptArg ((\f opts -> opts { optGenPw = Just $ read f }) 
+                     (OptArg ((\f opts -> opts { optGenPw = Just $ read f })
                               . fromMaybe "128") "PASSLENGTH")
                      "desired length of password (defaults to 128)"
           , Option ['U'] ["genuser"]
-                     (OptArg ((\f opts -> opts { optGenUser = Just $ read f }) 
+                     (OptArg ((\f opts -> opts { optGenUser = Just $ read f })
                               . fromMaybe "128") "NAMELENGTH")
                      "desired length of username (defaults to 128)"
           , Option [] ["delete"] -- do not bind a shortarg to this command
                      (NoArg (\opts -> opts { optAction = Just Delete }))
                      "delete an entry"
           -- , Option ['d'] ["dblocat"]
-          --            (OptArg ((\f opts -> opts { optDBlocat = f}) 
+          --            (OptArg ((\f opts -> opts { optDBlocat = f})
           --                     . fromMaybe "/home/frozencemetery/.pw.db") "FILE")
           --            "location of database (defaults to ~/.pw.db)"
           ]
 
 compilerOpts :: [String] -> IO (Options, [String])
-compilerOpts argv = 
+compilerOpts argv =
   let header = "Usage: pwstore [Option...] files..."
   in case getOpt Permute options argv of
-       (o, n, []) -> 
+       (o, n, []) ->
          return (foldl (flip id) defaultOptions o, n)
-       (_,_,errs) -> 
+       (_,_,errs) ->
          ioError (userError (concat errs ++ usageInfo header options))
