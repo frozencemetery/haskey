@@ -22,10 +22,11 @@ openDB = do
   hClose handle
   return $ read cont
 
-listEntries :: IO [String]
+listEntries :: IO String
 listEntries = do
   db <- openDB
-  return $ map fst db
+  let db' = concat $ intersperse "\n" $ map fst db
+  return db'
 
 get :: Maybe String -> (Maybe String, Maybe String) -> IO (Maybe (String, (String, String)))
 get s (u,p) = do

@@ -4,7 +4,7 @@ import System.Console.GetOpt
 import System.Environment
 import Data.Maybe
 import Prelude
-import System.IO.Unsafe (unsafePerformIO)
+import System.IO
 
 version = "0.5hg"
 
@@ -89,4 +89,5 @@ main = do
   (opts, trash) <- compilerOpts args
   if optShowVersion opts then print version else return ()
   if optShowLicense opts then print "GPLv3 motherfuckers!" else return ()
+  if optList opts then do entries <- listEntries; hPutStrLn stdout entries else return ()
   return ()
