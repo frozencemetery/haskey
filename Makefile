@@ -5,5 +5,5 @@ pwstore:
 
 clean:
 	rm -f *.hi *.o
-	rm -rf dist
+	rm -rf dist/*
 
