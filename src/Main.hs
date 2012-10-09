@@ -52,8 +52,8 @@ main = do
                                                hFlush stdout
                                                getLine
          b <- add dblocat sname uname pword
-         case b of True -> putStrLn "Added."
-                   False -> putStrLn "Added, overwriting existing entry."
+         case b of True -> putStrLn "Added, overwriting existing entry."
+                   False -> putStrLn "Added."
          return ()
     Just Delete ->
       do killp <- del dblocat (optService opts) (optUser opts) (optPassword opts)
