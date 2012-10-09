@@ -3,9 +3,6 @@ module Storage (listEntries, get, add, del, showdbent) where
 import Data.List
 import System.IO
 
-dblocat :: String
-dblocat = "/home/frozencemetery/.pw.db"
-
 -- (service, (username, password))
 type DBent = (String, (String, String))
 type DB = [DBent]
@@ -14,28 +11,28 @@ showdbent :: DBent -> String
 showdbent (s, (u,p)) = 
   concat ["Service:  ", s, "\nUsername: ", u, "\nPassword: ", p]
 
-writeDB :: DB -> IO ()
-writeDB db = do
+writeDB :: DB -> FilePath -> IO ()
+writeDB db dblocat = do
   handle <- openFile dblocat WriteMode
   hPutStr handle $ show db
   hClose handle
 
-openDB :: IO DB
-openDB = do
+openDB :: FilePath -> IO DB
+openDB dblocat = do
   handle <- openFile dblocat ReadMode
   cont <- hGetLine handle
   hClose handle
   return $ read cont
 
-listEntries :: IO String
-listEntries = do
-  db <- openDB
+listEntries :: FilePath -> IO String
+listEntries dblocat = do
+  db <- openDB dblocat
   let db' = intercalate "\n" $ map fst db
   return db'
 
-get :: Maybe String -> Maybe String -> Maybe String -> IO (Maybe DBent)
-get s u p = do
-  db <- openDB
+get :: FilePath -> Maybe String -> Maybe String -> Maybe String -> IO (Maybe DBent)
+get dblocat s u p = do
+  db <- openDB dblocat
   let sf x = case s of Nothing -> True ; Just k -> k == x
   let uf y = case u of Nothing -> True ; Just k -> k == y
   let pf z = case p of Nothing -> True ; Just k -> k == z
@@ -47,20 +44,20 @@ get s u p = do
 
 -- the Bool represents sharing
 -- by which I mean whether it overwrote
-add :: String -> String -> String -> IO Bool
-add s u p = do
-  db <- openDB
+add :: FilePath -> String -> String -> String -> IO Bool
+add dblocat s u p = do
+  db <- openDB dblocat
   let (b, db') = partition (\x -> fst x == s) db
   let newdb = (s, (u, p)) : db'
-  writeDB newdb
+  writeDB newdb dblocat
   return $ length b == 1
 
-del :: Maybe String -> Maybe String -> Maybe String -> IO Bool
-del s u p = do
-  db <- openDB
+del :: FilePath -> Maybe String -> Maybe String -> Maybe String -> IO Bool
+del dblocat s u p = do
+  db <- openDB dblocat
   let sf x = case s of Nothing -> True ; Just k -> k /= x
   let uf y = case u of Nothing -> True ; Just k -> k /= y
   let pf z = case p of Nothing -> True ; Just k -> k /= z
   let db' = filter (\(x,(y,z)) -> sf x && uf y && pf z) db
-  writeDB db'
+  writeDB db' dblocat
   return $ length db - length db' > 0

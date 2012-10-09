@@ -13,23 +13,23 @@ data Options = Options { optShowVersion :: Bool
                        , optGenPw :: Maybe Int
                        , optGenUser :: Maybe Int
                        , optAction :: Maybe Action
-                       -- , optDBlocat :: FilePath
+                       , optDBlocat :: FilePath
                        }
 
-defaultOptions :: Options
-defaultOptions = Options { optShowVersion = False
-                         , optShowLicense = False
-                         , optService = Nothing
-                         , optUser = Nothing
-                         , optPassword = Nothing
-                         , optGenPw = Nothing
-                         , optGenUser = Nothing
-                         , optAction = Nothing
-                         -- , optDBlocat = "/home/frozencemetery/.pw.db"
-                         }
+defaultOptions :: FilePath -> Options
+defaultOptions home = Options { optShowVersion = False
+                              , optShowLicense = False
+                              , optService = Nothing
+                              , optUser = Nothing
+                              , optPassword = Nothing
+                              , optGenPw = Nothing
+                              , optGenUser = Nothing
+                              , optAction = Nothing
+                              , optDBlocat = home ++ "/.pw.db"
+                              }
 
-options :: [OptDescr (Options -> Options)]
-options = [ Option ['v'] ["version"]
+options :: FilePath -> [OptDescr (Options -> Options)]
+options home = [ Option ['v'] ["version"]
                      (NoArg (\opts -> opts { optShowVersion = True }))
                      "Display version information"
           , Option ['l'] ["license"]
@@ -67,17 +67,17 @@ options = [ Option ['v'] ["version"]
           , Option [] ["delete"] -- do not bind a shortarg to this command
                      (NoArg (\opts -> opts { optAction = Just Delete }))
                      "delete an entry"
-          -- , Option ['d'] ["dblocat"]
-          --            (OptArg ((\f opts -> opts { optDBlocat = f})
-          --                     . fromMaybe "/home/frozencemetery/.pw.db") "FILE")
-          --            "location of database (defaults to ~/.pw.db)"
+          , Option ['d'] ["dblocat"]
+                     (OptArg ((\f opts -> opts { optDBlocat = f})
+                              . fromMaybe (home ++ "/.pw.db")) "FILE")
+                     "location of database (defaults to ~/.pw.db)"
           ]
 
-compilerOpts :: [String] -> IO (Options, [String])
-compilerOpts argv =
-  let header = "Usage: pwstore [Option...] files..."
-  in case getOpt Permute options argv of
-       (o, n, []) ->
-         return (foldl (flip id) defaultOptions o, n)
-       (_,_,errs) ->
-         ioError (userError (concat errs ++ usageInfo header options))
+compilerOpts :: [String] -> FilePath -> IO (Options, [String])
+compilerOpts argv home =
+   let header = "Usage: pwstore [Option...] files..."
+   in case getOpt Permute (options home) argv of
+        (o, n, []) ->
+          return (foldl (flip id) (defaultOptions home) o, n)
+        (_,_,errs) ->
+          ioError (userError (concat errs ++ usageInfo header (options home)))

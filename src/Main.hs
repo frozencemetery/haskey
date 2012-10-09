@@ -11,17 +11,21 @@ version = "1.1hg"
 main :: IO ()
 main = do
   args <- getArgs
-  (opts, trash) <- compilerOpts args
+  home <- getEnv "HOME"
+  (opts, trash) <- compilerOpts args home
+
+  let dblocat = optDBlocat opts
+
   when (optShowVersion opts) $ print version
   when (optShowLicense opts) $ print "GPLv3 motherfuckers!"
   case optAction opts of
     Nothing -> return ()
     Just List ->
-      do entries <- listEntries
+      do entries <- listEntries dblocat
          putStrLn entries
          return ()
     Just Lookup ->
-      do entry <- get (optService opts) (optUser opts) (optPassword opts)
+      do entry <- get dblocat (optService opts) (optUser opts) (optPassword opts)
          let entry' = maybe "no entry found" showdbent entry
          putStrLn entry'
          return ()
@@ -47,12 +51,12 @@ main = do
                                  Nothing -> do putStr "Password: "
                                                hFlush stdout
                                                getLine
-         b <- add sname uname pword
+         b <- add dblocat sname uname pword
          case b of True -> putStrLn "Added."
                    False -> putStrLn "Added, overwriting existing entry."
          return ()
     Just Delete ->
-      do killp <- del (optService opts) (optUser opts) (optPassword opts)
+      do killp <- del dblocat (optService opts) (optUser opts) (optPassword opts)
          case killp of True -> putStrLn "Deleted."
                        False -> putStrLn "No entries matched to delete."
          return ()
