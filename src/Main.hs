@@ -7,7 +7,7 @@ import System.IO
 import Control.Monad
 import System.Random
 
-version = "1.1"
+version = "1.2hg"
 
 main :: IO ()
 main = do
