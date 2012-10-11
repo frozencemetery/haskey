@@ -5,6 +5,7 @@ pwstore:
 
 install:
 	cp dist/build/pwstore/pwstore /usr/local/bin/.
+	cp scripts/* /usr/local/bin/.
 
 clean:
 	rm -f *.hi *.o
