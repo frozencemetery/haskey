@@ -14,6 +14,7 @@ data Options = Options { optShowVersion :: Bool
                        , optGenUser :: Maybe Int
                        , optAction :: Maybe Action
                        , optDBlocat :: FilePath
+                       , optXOut :: Bool
                        }
 
 defaultOptions :: FilePath -> Options
@@ -26,22 +27,26 @@ defaultOptions home = Options { optShowVersion = False
                               , optGenUser = Nothing
                               , optAction = Nothing
                               , optDBlocat = home ++ "/.pw.db"
+                              , optXOut = False
                               }
 
 options :: FilePath -> [OptDescr (Options -> Options)]
 options home = [ Option ['v'] ["version"]
                      (NoArg (\opts -> opts { optShowVersion = True }))
                      "Display version information"
-          , Option ['l'] ["license"]
+          , Option [] ["license"]
                      (NoArg (\opts -> opts { optShowLicense = True }))
                      "Print license (GPLv3) information"
-          , Option ['L'] ["lookup"]
+          , Option ['l'] ["lookup"]
                      (NoArg (\opts -> opts { optAction = Just Lookup }))
                      "Perform a username/password lookup"
+          , Option ['x'] ["xout"]
+                     (NoArg (\opts -> opts { optXOut = True }))
+                     "Outputs the password as if it were typed"
           , Option ['c'] ["create"]
                      (NoArg (\opts -> opts { optAction = Just Create }))
                      "Create a new entry (overwriting any duplicate)"
-          , Option [] ["list"]
+          , Option ['L'] ["list"]
                      (NoArg (\opts -> opts { optAction = Just List }))
                      "List the service names of all entries"
           , Option ['s'] ["service"]
@@ -70,7 +75,7 @@ options home = [ Option ['v'] ["version"]
           , Option ['d'] ["dblocat"]
                      (OptArg ((\f opts -> opts { optDBlocat = f})
                               . fromMaybe (home ++ "/.pw.db")) "FILE")
-                     "location of database (defaults to ~/.pw.db)"
+                     "location of database (defaults to ~/.pw.db)"          
           ]
 
 compilerOpts :: [String] -> FilePath -> IO (Options, [String])

@@ -57,6 +57,6 @@ gen display str = do
   Just (a,b,c,d) <- queryXTestSupport display' -- this line
   let str' = map mapkey str
   let res = map (\x -> sendKey display' (fst x) (snd x)) str' :: [IO ()]
-  let res' = foldl (\x y -> x >> (threadDelay 10000) >> y) (return ()) res :: IO ()
+  let res' = foldl (>>) (return ()) res :: IO ()
   res'
   

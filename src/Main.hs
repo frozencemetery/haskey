@@ -1,12 +1,13 @@
 import Pwgen
 import Storage
 import Args
+import XOut
 import System.Environment
 import System.IO
 import Control.Monad
 import System.Random
 
-version = "1.0"
+version = "1.1"
 
 main :: IO ()
 main = do
@@ -27,7 +28,9 @@ main = do
     Just Lookup ->
       do entry <- get dblocat (optService opts) (optUser opts) (optPassword opts)
          let entry' = maybe "no entry found" showdbent entry
-         putStrLn entry'
+         let pword = case entry of Nothing -> ""
+                                   Just k -> snd $ snd k
+         if optXOut opts then gen ":0" pword else putStrLn entry'
          return ()
     Just Create ->
       do sname <- case optService opts of Just k -> return k
