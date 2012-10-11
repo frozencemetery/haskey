@@ -30,7 +30,7 @@ main = do
          let entry' = maybe "no entry found" showdbent entry
          let pword = case entry of Nothing -> ""
                                    Just k -> snd $ snd k
-         if optXOut opts then gen ":0" pword else putStrLn entry'
+         if optXOut opts then gen ":0" (pword ++ "\n") else putStrLn entry'
          return ()
     Just Create ->
       do sname <- case optService opts of Just k -> return k
