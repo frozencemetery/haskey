@@ -18,8 +18,6 @@ mapkey '%' = ([xK_Shift_R], xK_percent)
 mapkey '^' = ([xK_Shift_R], xK_asciicircum)
 mapkey '&' = ([xK_Shift_R], xK_ampersand)
 mapkey '*' = ([xK_Shift_R], xK_asterisk)
-mapkey '(' = ([xK_Shift_R], xK_parenleft)
-mapkey ')' = ([xK_Shift_R], xK_parenright)
 mapkey '_' = ([xK_Shift_R], xK_underscore)
 mapkey '+' = ([xK_Shift_R], xK_plus)
 mapkey '{' = ([xK_Shift_R], xK_bracketleft)
@@ -35,9 +33,15 @@ mapkey '"' = ([xK_Shift_R], xK_apostrophe)
 mapkey ',' = ([], xK_comma)
 mapkey '.' = ([], xK_period)
 mapkey '/' = ([], xK_slash)
-mapkey '>' = ([xK_Shift_R], xK_greater)
-mapkey '<' = ([xK_Shift_R], xK_less)
 mapkey '?' = ([xK_Shift_R], xK_question)
+mapkey ' ' = ([], xK_space)
+mapkey '\n' = ([], xK_Return)
+mapkey '>' = ([xK_Shift_R], xK_greater)
+mapkey '<' = ([], xK_less) -- no shift here is correct (why?)
+-- doing this with parenleft breaks qemu integration
+-- likewise with parenright
+mapkey '(' = ([xK_Shift_R], xK_9)
+mapkey ')' = ([xK_Shift_R], xK_0)
 mapkey c
   | c `elem` letters = let Just i = elemIndex c letters
                        in ([], keys !! i)
@@ -57,6 +61,6 @@ gen display str = do
   Just (a,b,c,d) <- queryXTestSupport display' -- this line
   let str' = map mapkey str
   let res = map (\x -> sendKey display' (fst x) (snd x)) str' :: [IO ()]
-  let res' = foldl (>>) (return ()) res :: IO ()
+  let res' = foldl (\x y -> x >> (threadDelay 1000) >> y) (return ()) res :: IO ()
   res'
   
