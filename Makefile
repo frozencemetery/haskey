@@ -1,10 +1,10 @@
-default: pwstore
+default: pwman
 
-pwstore:
+pwman:
 	runhaskell Setup.hs build
 
 install:
-	cp dist/build/pwstore/pwstore /usr/local/bin/.
+	cp dist/build/pwman/pwman /usr/local/bin/.
 	cp scripts/* /usr/local/bin/.
 
 clean:

@@ -1,0 +1,2 @@
+#!/bin/sh
+pwman -x -l -s"$(pwman -L | dmenu)"

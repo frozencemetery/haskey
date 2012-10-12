@@ -80,7 +80,7 @@ options home = [ Option ['v'] ["version"]
 
 compilerOpts :: [String] -> FilePath -> IO (Options, [String])
 compilerOpts argv home =
-   let header = "Usage: pwstore [Option...] files..."
+   let header = "Usage: pwman [Option...] files..."
    in case getOpt Permute (options home) argv of
         (o, n, []) ->
           return (foldl (flip id) (defaultOptions home) o, n)

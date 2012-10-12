@@ -1,19 +1,5 @@
-pwstore is a password management tool, by which I mean it supports password
+pwman is a password management tool, by which I mean it supports password
 creation and storage.  Planned interfaces are a CLI (which will be developed
 first) and X11 (to follow).  The X11 interface will be designed to simplify
 passing passwords into virtual machines, focusing on the Qemu mode of
 operation.
-
-*** ALL USERS PLEASE NOTE ***
-
-This is the site of former repository of a tool called pwstore that was
-formerly in lisp.  Henceforth, the lisp tool will be referred to as
-"pwstore.lisp".  It is deprecated.  The new tool ("pwstore.hs" for
-differentiation purposes) will have a superset of its features.  I will
-attempt to keep compatibility, but where such would impede development, it
-will be forgone.
-
-*** UPDATE ***
-
-pwstore.hs has eclipsed the feature set of pwstore.lisp.  All users please
-migrate.  pwstore.lisp is fully depricated.
