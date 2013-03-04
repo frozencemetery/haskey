@@ -20,19 +20,25 @@ main = do
 
   when (optShowVersion opts) $ print version
   when (optShowLicense opts) $ print "GPLv3"
-  case (optAction opts, optKey opts) of
-    (Nothing, _) -> return ()
-    (_, Nothing) -> putStrLn "No key provided"
-    (Just List, Just key) ->
+
+  key <- case optKey opts of
+    Nothing -> do putStr "Enter keychain password: "
+                  hFlush stdout
+                  getLine
+    Just k -> return k
+
+  case optAction opts of
+    Nothing -> return ()
+    Just List ->
       do entries <- listEntries (makeKey key) dblocat
          putStrLn entries
-    (Just Lookup, Just key) ->
+    Just Lookup ->
       do entry <- get (makeKey key) dblocat (optService opts) (optUser opts)
                   (optPassword opts)
          let entry' = maybe "no entry found" showdbent entry
          let pword = case entry of Nothing -> ""; Just (s, u, p) -> p
          if optXOut opts then gen ":0" $ pword ++ "\n" else putStrLn entry'
-    (Just Create, Just key) ->
+    Just Create ->
       do sname <- case optService opts of Just k -> return k
                                           Nothing -> do putStr "Service:  "
                                                         hFlush stdout
@@ -58,7 +64,7 @@ main = do
          case b of True -> putStrLn "Added, overwriting existing entry."
                    False -> putStrLn "Added."
          return ()
-    (Just Delete, Just key) ->
+    Just Delete ->
       do killp <- del (makeKey key) dblocat (optService opts) (optUser opts) (optPassword opts)
          case killp of True -> putStrLn "Deleted."
                        False -> putStrLn "No entries matched to delete."
