@@ -1,11 +1,12 @@
+import Args
+import Control.Monad
+import Crypt
 import Pwgen
 import Storage
-import Args
-import XOut
 import System.Environment
 import System.IO
-import Control.Monad
 import System.Random
+import XOut
 
 version = "1.2hg"
 
@@ -18,21 +19,20 @@ main = do
   let dblocat = optDBlocat opts
 
   when (optShowVersion opts) $ print version
-  when (optShowLicense opts) $ print "GPLv3 motherfuckers!"
-  case optAction opts of
-    Nothing -> return ()
-    Just List ->
-      do entries <- listEntries dblocat
+  when (optShowLicense opts) $ print "GPLv3"
+  case (optAction opts, optKey opts) of
+    (Nothing, _) -> return ()
+    (_, Nothing) -> putStrLn "No key provided"
+    (Just List, Just key) ->
+      do entries <- listEntries (makeKey key) dblocat
          putStrLn entries
-         return ()
-    Just Lookup ->
-      do entry <- get dblocat (optService opts) (optUser opts) (optPassword opts)
+    (Just Lookup, Just key) ->
+      do entry <- get (makeKey key) dblocat (optService opts) (optUser opts)
+                  (optPassword opts)
          let entry' = maybe "no entry found" showdbent entry
-         let pword = case entry of Nothing -> ""
-                                   Just k -> snd $ snd k
-         if optXOut opts then gen ":0" (pword ++ "\n") else putStrLn entry'
-         return ()
-    Just Create ->
+         let pword = case entry of Nothing -> ""; Just (s, u, p) -> p
+         if optXOut opts then gen ":0" $ pword ++ "\n" else putStrLn entry'
+    (Just Create, Just key) ->
       do sname <- case optService opts of Just k -> return k
                                           Nothing -> do putStr "Service:  "
                                                         hFlush stdout
@@ -50,17 +50,15 @@ main = do
          pword <- case optPassword opts of
                     Just k -> return k
                     Nothing -> case optGenPw opts of
-                                 Just i -> return $ fst $ pwgen r i
+                                 Just i -> return $ fst $ pwgen r' i
                                  Nothing -> do putStr "Password: "
                                                hFlush stdout
                                                getLine
-         b <- add dblocat sname uname pword
+         b <- add (makeKey key) dblocat sname uname pword
          case b of True -> putStrLn "Added, overwriting existing entry."
                    False -> putStrLn "Added."
          return ()
-    Just Delete ->
-      do killp <- del dblocat (optService opts) (optUser opts) (optPassword opts)
+    (Just Delete, Just key) ->
+      do killp <- del (makeKey key) dblocat (optService opts) (optUser opts) (optPassword opts)
          case killp of True -> putStrLn "Deleted."
                        False -> putStrLn "No entries matched to delete."
-         return ()
-  return ()

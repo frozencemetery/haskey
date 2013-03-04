@@ -10,6 +10,7 @@ data Options = Options { optShowVersion :: Bool
                        , optService :: Maybe String
                        , optUser :: Maybe String
                        , optPassword :: Maybe String
+                       , optKey :: Maybe String
                        , optGenPw :: Maybe Int
                        , optGenUser :: Maybe Int
                        , optAction :: Maybe Action
@@ -23,6 +24,7 @@ defaultOptions home = Options { optShowVersion = False
                               , optService = Nothing
                               , optUser = Nothing
                               , optPassword = Nothing
+                              , optKey = Nothing
                               , optGenPw = Nothing
                               , optGenUser = Nothing
                               , optAction = Nothing
@@ -61,6 +63,10 @@ options home = [ Option ['v'] ["version"]
                      (OptArg ((\f opts -> opts { optPassword = Just f })
                               . fromMaybe "hunter2") "PASSWORD")
                      "password to use"
+          , Option ['k'] ["keychain password"]
+                     (OptArg ((\f opts -> opts { optKey = Just f })
+                              . fromMaybe "password") "KEYCHAIN PASSWORD")
+                     "password to unlock keychain"
           , Option ['P'] ["genpw"]
                      (OptArg ((\f opts -> opts { optGenPw = Just $ read f })
                               . fromMaybe "128") "PASSLENGTH")
@@ -75,7 +81,7 @@ options home = [ Option ['v'] ["version"]
           , Option ['d'] ["dblocat"]
                      (OptArg ((\f opts -> opts { optDBlocat = f})
                               . fromMaybe (home ++ "/.pw.db")) "FILE")
-                     "location of database (defaults to ~/.pw.db)"          
+                     "location of database (defaults to ~/.pw.db)"
           ]
 
 compilerOpts :: [String] -> FilePath -> IO (Options, [String])

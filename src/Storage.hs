@@ -1,42 +1,48 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Storage (listEntries, get, add, del, showdbent) where
 
+import Crypt
+import Data.LargeWord
 import Data.List
 import System.IO
+import Data.Functor
 
--- (service, (username, password))
-type DBent = (String, (String, String))
+type DBent = (String, String, String)
 type DB = [DBent]
 
 showdbent :: DBent -> String
-showdbent (s, (u,p)) = 
+showdbent (s, u, p) =
   concat ["Service:  ", s, "\nUsername: ", u, "\nPassword: ", p]
 
-writeDB :: DB -> FilePath -> IO ()
-writeDB db dblocat = do
+writeDB :: Key -> DB -> FilePath -> IO ()
+writeDB key db dblocat = do
   handle <- openFile dblocat WriteMode
-  hPutStr handle $ show db
+  dbe <- mapM ((encryptMessage key).show) db
+  hPutStr handle $ show dbe
   hClose handle
 
-openDB :: FilePath -> IO DB
-openDB dblocat = do
+openDB :: Key -> FilePath -> IO DB
+openDB key dblocat = do
   handle <- openFile dblocat ReadMode
   cont <- hGetLine handle
   hClose handle
-  return $ read cont
+  return $ read.(decryptMessage key) <$> map fromInteger <$> read cont
 
-listEntries :: FilePath -> IO String
-listEntries dblocat = do
-  db <- openDB dblocat
-  let db' = intercalate "\n" $ map fst db
+listEntries :: Key -> FilePath -> IO String
+listEntries key dblocat = do
+  db <- openDB key dblocat
+  let db' = intercalate "\n" $ map (\(x,y,z) -> x) db
   return db'
 
-get :: FilePath -> Maybe String -> Maybe String -> Maybe String -> IO (Maybe DBent)
-get dblocat s u p = do
-  db <- openDB dblocat
+get :: Key -> FilePath -> Maybe String -> Maybe String -> Maybe String
+       -> IO (Maybe DBent)
+get key dblocat s u p = do
+  db <- openDB key dblocat
   let sf x = case s of Nothing -> True ; Just k -> k == x
   let uf y = case u of Nothing -> True ; Just k -> k == y
   let pf z = case p of Nothing -> True ; Just k -> k == z
-  let db' = filter (\(x,(y,z)) -> sf x && uf y && pf z) db
+  let db' = filter (\(x,y,z) -> sf x && uf y && pf z) db
   let ret = case length db' of
               1 -> Just $ head db'
               _ -> Nothing
@@ -44,20 +50,20 @@ get dblocat s u p = do
 
 -- the Bool represents sharing
 -- by which I mean whether it overwrote
-add :: FilePath -> String -> String -> String -> IO Bool
-add dblocat s u p = do
-  db <- openDB dblocat
-  let (b, db') = partition (\x -> fst x == s) db
-  let newdb = (s, (u, p)) : db'
-  writeDB newdb dblocat
+add :: Key -> FilePath -> String -> String -> String -> IO Bool
+add key dblocat s u p = do
+  db <- openDB key dblocat
+  let (b, db') = partition (\(x,y,z) -> x == s) db
+  let newdb = (s, u, p) : db'
+  writeDB key newdb dblocat
   return $ length b == 1
 
-del :: FilePath -> Maybe String -> Maybe String -> Maybe String -> IO Bool
-del dblocat s u p = do
-  db <- openDB dblocat
+del :: Key -> FilePath -> Maybe String -> Maybe String -> Maybe String -> IO Bool
+del key dblocat s u p = do
+  db <- openDB key dblocat
   let sf x = case s of Nothing -> True ; Just k -> k /= x
   let uf y = case u of Nothing -> True ; Just k -> k /= y
   let pf z = case p of Nothing -> True ; Just k -> k /= z
-  let db' = filter (\(x,(y,z)) -> sf x && uf y && pf z) db
-  writeDB db' dblocat
+  let db' = filter (\(x,y,z) -> sf x && uf y && pf z) db
+  writeDB key db' dblocat
   return $ length db - length db' > 0
