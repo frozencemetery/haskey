@@ -1,9 +1,9 @@
 module XOut where
 
-import Graphics.X11.XTest
-import Graphics.X11
 import Control.Concurrent
 import Data.List
+import Graphics.X11
+import Graphics.X11.XTest
 
 mapkey :: Char -> ([KeySym], KeySym)
 mapkey '`' = ([], xK_quoteleft)
@@ -63,4 +63,3 @@ gen display str = do
   let res = map (\x -> sendKey display' (fst x) (snd x)) str' :: [IO ()]
   let res' = foldl (\x y -> x >> (threadDelay 1000) >> y) (return ()) res :: IO ()
   res'
-  

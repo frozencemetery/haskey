@@ -3,11 +3,12 @@
 module Storage (listEntries, get, add, del, showdbent) where
 
 import Crypt
+import Data.Functor
 import Data.LargeWord
 import Data.List
 import System.IO
-import Data.Functor
 
+-- (service, username, password)
 type DBent = (String, String, String)
 type DB = [DBent]
 

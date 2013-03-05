@@ -63,7 +63,6 @@ main = do
          b <- add (makeKey key) dblocat sname uname pword
          case b of True -> putStrLn "Added, overwriting existing entry."
                    False -> putStrLn "Added."
-         return ()
     Just Delete ->
       do killp <- del (makeKey key) dblocat (optService opts) (optUser opts) (optPassword opts)
          case killp of True -> putStrLn "Deleted."

@@ -1,7 +1,7 @@
 module Args where
 
-import System.Console.GetOpt
 import Data.Maybe
+import System.Console.GetOpt
 
 data Action = Create | Lookup | Delete | List
 

@@ -6,6 +6,9 @@ import Codec.Encryption.Padding
 import Data.Digest.SHA512
 import Data.LargeWord
 import System.Random
+
+-- `unsafeCoerce' is used to convert between `Char's and `Word8's.
+
 import Unsafe.Coerce
 
 type Key = Word128
