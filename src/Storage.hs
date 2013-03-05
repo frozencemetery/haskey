@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Storage (listEntries, get, add, del, showdbent) where
+module Storage (listEntries, get, add, del, showdbent, rekey) where
 
 import Crypt
 import Data.Functor
@@ -68,3 +68,8 @@ del key dblocat s u p = do
   let db' = filter (\(x,y,z) -> sf x && uf y && pf z) db
   writeDB key db' dblocat
   return $ length db - length db' > 0
+
+rekey :: Key -> Key -> FilePath -> IO ()
+rekey oldKey newKey dblocat = do
+  db <- openDB oldKey dblocat
+  writeDB newKey db dblocat
