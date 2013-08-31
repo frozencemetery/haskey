@@ -3,7 +3,7 @@ module Args where
 import Data.Maybe
 import System.Console.GetOpt
 
-data Action = Create | Lookup | Delete | List | Rekey
+data Action = Create | Lookup | Delete | List | Rekey | MakeDB
 
 data Options = Options { optShowVersion :: Bool
                        , optShowLicense :: Bool
@@ -42,6 +42,9 @@ options home = [ Option ['v'] ["version"]
           , Option ['l'] ["lookup"]
                      (NoArg (\opts -> opts { optAction = Just Lookup }))
                      "Perform a username/password lookup"
+          , Option ['m'] ["make db"]
+                     (NoArg (\opts -> opts { optAction = Just MakeDB }))
+                     "Create an empty password database."
           , Option ['R'] ["rekey"]
                      (NoArg (\opts -> opts { optAction = Just Rekey }))
                      "Re-encrypt the database under a different password."

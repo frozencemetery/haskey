@@ -13,8 +13,8 @@ import XOut
 
 version = "1.2hg"
 keyPrompt = "Enter keychain password: "
-oldPrompt = "Warning: if you mistype your password, all data will be lost. "
-         ++ "Enter current keychain password: "
+tryAgainPrompt = "Incorrect password. Please try again: "
+oldPrompt = "Enter current keychain password: "
 newPrompt = "Enter new keychain password: "
 confirmPrompt = "Confirm new keychain password: "
 title = "Password entry."
@@ -53,9 +53,19 @@ getKey p =
      widgetShowAll window
      mainGUI
      key <- readIORef keyRef
+     widgetHideAll window
      case key of
        Nothing -> getKey p
        Just key -> return key
+
+getDB :: String -> IO (Key, DB)
+getDB = getDB' keyPrompt
+  where getDB' p dblocat =
+          do k <- getKey p
+             dbm <- openDB (makeKey k) dblocat
+             case dbm of
+               Nothing -> getDB' tryAgainPrompt dblocat
+               Just db -> return (makeKey k, db)
 
 main :: IO ()
 main = do
@@ -71,18 +81,17 @@ main = do
   case optAction opts of
     Nothing -> return ()
     Just List ->
-      do key <- getKey keyPrompt
-         entries <- listEntries (makeKey key) dblocat
+      do (key, db) <- getDB dblocat
+         entries <- listEntries db
          putStrLn entries
     Just Lookup ->
-      do key <- getKey keyPrompt
-         entry <- get (makeKey key) dblocat (optService opts) (optUser opts)
-                  (optPassword opts)
+      do (key, db) <- getDB dblocat
+         entry <- get db (optService opts) (optUser opts) (optPassword opts)
          let entry' = maybe "no entry found" showdbent entry
          let pword = case entry of Nothing -> ""; Just (s, u, p) -> p
          if optXOut opts then gen ":0" $ pword ++ "\n" else putStrLn entry'
     Just Create ->
-      do key <- getKey keyPrompt
+      do (key, db) <- getDB dblocat
          sname <- case optService opts of Just k -> return k
                                           Nothing -> do putStr "Service:  "
                                                         hFlush stdout
@@ -104,20 +113,24 @@ main = do
                                  Nothing -> do putStr "Password: "
                                                hFlush stdout
                                                getLine
-         b <- add (makeKey key) dblocat sname uname pword
+         b <- add key dblocat db sname uname pword
          case b of True -> putStrLn "Added, overwriting existing entry."
                    False -> putStrLn "Added."
     Just Delete ->
-      do key <- getKey keyPrompt
-         killp <- del (makeKey key) dblocat (optService opts) (optUser opts)
+      do (key, db) <- getDB dblocat
+         killp <- del key dblocat db (optService opts) (optUser opts)
                       (optPassword opts)
          case killp of True -> putStrLn "Deleted."
                        False -> putStrLn "No entries matched to delete."
     Just Rekey ->
-      do oldKey <- getKey oldPrompt
+      do (_, db) <- getDB dblocat
          newKey1 <- getKey newPrompt
          newKey2 <- getKey confirmPrompt
          if newKey1 == newKey2
-           then rekey (makeKey oldKey) (makeKey newKey2) dblocat
+           then writeDB (makeKey newKey2) db dblocat
            else putStrLn $ "Sorry, new passwords did not match. "
                         ++ "No action performed."
+
+    Just MakeDB ->
+      do key <- getKey newPrompt
+         makeDB (makeKey key) dblocat

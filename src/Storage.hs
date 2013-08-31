@@ -1,9 +1,20 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Storage (listEntries, get, add, del, showdbent, rekey) where
+module Storage
+  ( DB
+  , listEntries
+  , get
+  , add
+  , del
+  , showdbent
+  , makeDB
+  , openDB
+  , writeDB
+  ) where
 
+import Codec.Utils
 import Crypt
-import Data.Functor
+import Data.Digest.SHA256
 import Data.LargeWord
 import Data.List
 import System.IO
@@ -19,27 +30,28 @@ showdbent (s, u, p) =
 writeDB :: Key -> DB -> FilePath -> IO ()
 writeDB key db dblocat = do
   handle <- openFile dblocat WriteMode
-  dbe <- mapM ((encryptMessage key).show) db
-  hPutStr handle $ show dbe
+  dbe <- encryptMessage key $ show db
+  hPutStr handle $ show (hash (toOctets (256 :: Integer) key), dbe)
   hClose handle
 
-openDB :: Key -> FilePath -> IO DB
+openDB :: Key -> FilePath -> IO (Maybe DB)
 openDB key dblocat = do
   handle <- openFile dblocat ReadMode
   cont <- hGetLine handle
   hClose handle
-  return $ read.(decryptMessage key) <$> map fromInteger <$> read cont
+  let (check, dbi) = read cont :: ([Octet], [Integer])
+  if check == hash (toOctets (256 :: Integer) key)
+    then return $ Just $ read $ decryptMessage key $ map fromInteger dbi
+    else return Nothing
 
-listEntries :: Key -> FilePath -> IO String
-listEntries key dblocat = do
-  db <- openDB key dblocat
+listEntries :: DB -> IO String
+listEntries db = do
   let db' = intercalate "\n" $ map (\(x,y,z) -> x) db
   return db'
 
-get :: Key -> FilePath -> Maybe String -> Maybe String -> Maybe String
+get :: DB -> Maybe String -> Maybe String -> Maybe String
        -> IO (Maybe DBent)
-get key dblocat s u p = do
-  db <- openDB key dblocat
+get db s u p = do
   let sf x = case s of Nothing -> True ; Just k -> k == x
   let uf y = case u of Nothing -> True ; Just k -> k == y
   let pf z = case p of Nothing -> True ; Just k -> k == z
@@ -51,17 +63,16 @@ get key dblocat s u p = do
 
 -- the Bool represents sharing
 -- by which I mean whether it overwrote
-add :: Key -> FilePath -> String -> String -> String -> IO Bool
-add key dblocat s u p = do
-  db <- openDB key dblocat
+add :: Key -> FilePath -> DB -> String -> String -> String -> IO Bool
+add key dblocat db s u p = do
   let (b, db') = partition (\(x,y,z) -> x == s) db
   let newdb = (s, u, p) : db'
   writeDB key newdb dblocat
   return $ length b == 1
 
-del :: Key -> FilePath -> Maybe String -> Maybe String -> Maybe String -> IO Bool
-del key dblocat s u p = do
-  db <- openDB key dblocat
+del :: Key -> FilePath -> DB -> Maybe String -> Maybe String -> Maybe String
+       -> IO Bool
+del key dblocat db s u p = do
   let sf x = case s of Nothing -> True ; Just k -> k /= x
   let uf y = case u of Nothing -> True ; Just k -> k /= y
   let pf z = case p of Nothing -> True ; Just k -> k /= z
@@ -69,7 +80,5 @@ del key dblocat s u p = do
   writeDB key db' dblocat
   return $ length db - length db' > 0
 
-rekey :: Key -> Key -> FilePath -> IO ()
-rekey oldKey newKey dblocat = do
-  db <- openDB oldKey dblocat
-  writeDB newKey db dblocat
+makeDB :: Key -> FilePath -> IO ()
+makeDB key dblocat = writeDB key [] dblocat
