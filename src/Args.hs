@@ -42,7 +42,7 @@ options home = [ Option ['v'] ["version"]
           , Option ['l'] ["lookup"]
                      (NoArg (\opts -> opts { optAction = Just Lookup }))
                      "Perform a username/password lookup"
-          , Option ['m'] ["make db"]
+          , Option ['m'] ["makedb"]
                      (NoArg (\opts -> opts { optAction = Just MakeDB }))
                      "Create an empty password database."
           , Option ['R'] ["rekey"]
@@ -69,7 +69,7 @@ options home = [ Option ['v'] ["version"]
                      (OptArg ((\f opts -> opts { optPassword = Just f })
                               . fromMaybe "hunter2") "PASSWORD")
                      "password to use"
-          , Option ['k'] ["keychain password"]
+          , Option ['k'] ["keypass"]
                      (OptArg ((\f opts -> opts { optKey = Just f })
                               . fromMaybe "password") "KEYCHAIN PASSWORD")
                      "password to unlock keychain"
