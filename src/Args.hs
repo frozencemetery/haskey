@@ -3,7 +3,7 @@ module Args where
 import Data.Maybe
 import System.Console.GetOpt
 
-data Action = Create | Lookup | Delete | List | Rekey | MakeDB
+data Action = Create | Lookup | Delete | List | Echo | Rekey | MakeDB
 
 data Options = Options { optShowVersion :: Bool
                        , optShowLicense :: Bool
@@ -84,6 +84,9 @@ options home = [ Option ['v'] ["version"]
           , Option [] ["delete"] -- do not bind a shortarg to this command
                      (NoArg (\opts -> opts { optAction = Just Delete }))
                      "delete an entry"
+          , Option [] ["echokey"] -- do not bind a shortarg to this command
+                     (NoArg (\opts -> opts { optAction = Just Echo }))
+                     "request, check, and echo key pass"
           , Option ['d'] ["dblocat"]
                      (OptArg ((\f opts -> opts { optDBlocat = f})
                               . fromMaybe (home ++ "/.pw.db")) "FILE")
