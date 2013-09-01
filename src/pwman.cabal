@@ -10,5 +10,5 @@ Cabal-version:  >=1.2
 Executable pwman
   Main-Is:              Main.hs
   Hs-Source-Dirs:       src
-  Build-Depends:        base, random, xtest, X11
+  Build-Depends:        base, random, xtest, X11, Crypto, gtk
   Extensions:           
