@@ -54,11 +54,13 @@ mapkey c
           keys = [xK_a..xK_z]
           numbers = ['0'..'9']
           numkeys = [xK_0..xK_9]
+mapkey c = error $ "No map for key: " ++ [c]
+
 -- this is modeled from the example and needs some cleanup
 gen :: String -> String -> IO ()
 gen display str = do
   display' <- openDisplay display
-  Just (a,b,c,d) <- queryXTestSupport display' -- this line
+  Just _ <- queryXTestSupport display' -- this line
   let str' = map mapkey str
   let res = map (\x -> sendKey display' (fst x) (snd x)) str' :: [IO ()]
   let res' = foldl (\x y -> x >> (threadDelay 1000) >> y) (return ()) res :: IO ()

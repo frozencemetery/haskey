@@ -1,20 +1,15 @@
 module GetKey where
 
-import Control.Monad
 import Data.IORef
 import Graphics.UI.Gtk hiding (get, add)
 import Prompts
-import Pwgen
-import System.Environment
-import System.IO
-import System.Random
 import System.Exit
 
 -- Interactively ask user for key
 getKey :: String -> IO String
 getKey p =
   do keyRef <- newIORef Nothing
-     initGUI
+     _ <- initGUI
      -- Widgets
      window <- windowNew
      label <- labelNew $ Just p
@@ -34,12 +29,12 @@ getKey p =
                 , windowResizable := False
                 , windowDefaultWidth := 400 ]
      -- Handlers
-     onClicked buttonOk $
+     _ <- onClicked buttonOk $
        do t <- entryGetText entry
           writeIORef keyRef $ Just t
           mainQuit
-     onClicked buttonCancel $ exitWith ExitSuccess
-     onDestroy window mainQuit
+     _ <- onClicked buttonCancel $ exitWith ExitSuccess
+     _ <- onDestroy window mainQuit
      -- Go
      widgetShowAll window
      mainGUI
@@ -47,4 +42,4 @@ getKey p =
      widgetHideAll window
      case key of
        Nothing -> getKey p
-       Just key -> return key
+       Just k -> return k

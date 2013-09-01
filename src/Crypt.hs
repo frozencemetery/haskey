@@ -36,3 +36,4 @@ encryptMessage k s =
      return $ iv:(cbc encrypt iv k $ pkcs5 $ map unsafeCoerce s)
 
 decryptMessage k (iv:m) = map unsafeCoerce $ unPkcs5 $ unCbc decrypt iv k m
+decryptMessage _ _ = error "Need initial vector."

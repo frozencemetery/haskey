@@ -1,18 +1,16 @@
 import Args
 import Control.Monad
 import Crypt
-import Data.IORef
 import GetKey
-import Graphics.UI.Gtk hiding (get, add)
 import Prompts
 import Pwgen
 import Storage
 import System.Environment
 import System.IO
 import System.Random
-import System.Exit
 import XOut
 
+version :: String
 version = "1.2hg"
 
 getDB :: Options -> String -> IO (String, Key, DB)
@@ -35,7 +33,7 @@ main :: IO ()
 main = do
   args <- getArgs
   home <- getEnv "HOME"
-  (opts, trash) <- compilerOpts args home
+  (opts, _) <- compilerOpts args home
 
   let dblocat = optDBlocat opts
 
@@ -45,14 +43,14 @@ main = do
   case optAction opts of
     Nothing -> return ()
     Just List ->
-      do (_, key, db) <- getDB opts dblocat
+      do (_, _, db) <- getDB opts dblocat
          entries <- listEntries db
          putStrLn entries
     Just Lookup ->
-      do (_, key, db) <- getDB opts dblocat
+      do (_, _, db) <- getDB opts dblocat
          entry <- get db (optService opts) (optUser opts) (optPassword opts)
          let entry' = maybe "no entry found" showdbent entry
-         let pword = case entry of Nothing -> ""; Just (s, u, p) -> p
+         let pword = case entry of Nothing -> ""; Just (_, _, p) -> p
          if optXOut opts then gen ":0" $ pword ++ "\n" else putStrLn entry'
     Just Create ->
       do (_, key, db) <- getDB opts dblocat

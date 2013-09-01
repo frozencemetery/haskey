@@ -11,4 +11,4 @@ Executable pwman
   Main-Is:              Main.hs
   Hs-Source-Dirs:       src
   Build-Depends:        base, random, xtest, X11, Crypto, gtk
-  Extensions:           
+  Ghc-options:          -Wall

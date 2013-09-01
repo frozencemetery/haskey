@@ -15,7 +15,6 @@ module Storage
 import Codec.Utils
 import Crypt
 import Data.Digest.SHA256
-import Data.LargeWord
 import Data.List
 import System.IO
 
@@ -46,7 +45,7 @@ openDB key dblocat = do
 
 listEntries :: DB -> IO String
 listEntries db = do
-  let db' = intercalate "\n" $ map (\(x,y,z) -> x) db
+  let db' = intercalate "\n" $ map (\(x,_,_) -> x) db
   return db'
 
 get :: DB -> Maybe String -> Maybe String -> Maybe String
@@ -65,7 +64,7 @@ get db s u p = do
 -- by which I mean whether it overwrote
 add :: Key -> FilePath -> DB -> String -> String -> String -> IO Bool
 add key dblocat db s u p = do
-  let (b, db') = partition (\(x,y,z) -> x == s) db
+  let (b, db') = partition (\(x,_,_) -> x == s) db
   let newdb = (s, u, p) : db'
   writeDB key newdb dblocat
   return $ length b == 1
