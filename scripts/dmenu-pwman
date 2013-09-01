@@ -1,2 +1,3 @@
-#!/bin/sh
-pwman -x -l -s"$(pwman -L | dmenu)"
+#!/bin/bash
+PSWD="$(pwman --echokey)"
+pwman -k${PSWD} -x -l -s"$(pwman -k"${PSWD}" -L | dmenu)"
