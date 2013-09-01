@@ -11,7 +11,7 @@ import System.Random
 
 import Unsafe.Coerce
 
-type Key = Word128
+type Key = Word256
 type Data = [Word128]
 
 makeKey :: String -> Key
