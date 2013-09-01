@@ -71,7 +71,7 @@ options home = [ Option ['v'] ["version"]
                      "password to use"
           , Option ['k'] ["keypass"]
                      (OptArg ((\f opts -> opts { optKey = Just f })
-                              . fromMaybe "password") "KEYCHAIN PASSWORD")
+                              . fromMaybe "password") "PASSWORD")
                      "password to unlock keychain"
           , Option ['P'] ["genpw"]
                      (OptArg ((\f opts -> opts { optGenPw = Just $ read f })
