@@ -12,11 +12,14 @@ module Storage
   , writeDB
   ) where
 
-import Codec.Utils
-import Crypt
-import Data.Digest.SHA256
+import Control.DeepSeq
 import Data.List
+import GHC.IO.Exception
 import System.IO
+import System.Process
+import System.Posix.IO
+
+type Key = String
 
 -- (service, username, password)
 type DBent = (String, String, String)
@@ -27,21 +30,57 @@ showdbent (s, u, p) =
   concat ["Service:  ", s, "\nUsername: ", u, "\nPassword: ", p]
 
 writeDB :: Key -> DB -> FilePath -> IO ()
-writeDB key db dblocat = do
-  handle <- openFile dblocat WriteMode
-  dbe <- encryptMessage key $ show db
-  hPutStr handle $ show (hash (toOctets (256 :: Integer) key), dbe)
-  hClose handle
+writeDB key db dblocat =
+  do (x, y) <- createPipe
+     h <- fdToHandle y
+     outHandle <- openFile dblocat WriteMode
+     let cp = CreateProcess
+           { cmdspec = RawCommand "openssl" ["enc", "-aes-256-cbc", "-pass",
+                                             "fd:" ++ show x]
+           , cwd = Nothing
+           , env = Just []
+           , std_in = CreatePipe
+           , std_out = UseHandle outHandle
+           , std_err = Inherit
+           , close_fds = False
+           , create_group = False }
+     (Just i, Nothing, Nothing, p) <- createProcess cp
+     hPutStrLn i $ show db
+     hClose i
+     hPutStr h $ key ++ "\n"
+     hClose h
+     ec <- waitForProcess p
+     case ec of
+       ExitSuccess -> hClose outHandle
+       ExitFailure _ -> error "Fatal error: openssl died."
 
 openDB :: Key -> FilePath -> IO (Maybe DB)
-openDB key dblocat = do
-  handle <- openFile dblocat ReadMode
-  cont <- hGetLine handle
-  hClose handle
-  let (check, dbi) = read cont :: ([Octet], [Integer])
-  if check == hash (toOctets (256 :: Integer) key)
-    then return $ Just $ read $ decryptMessage key $ map fromInteger dbi
-    else return Nothing
+openDB key dblocat =
+  do (x, y) <- createPipe
+     h <- fdToHandle y
+     inHandle <- openFile dblocat ReadMode
+     let cp = CreateProcess
+           { cmdspec = RawCommand "openssl" ["enc", "-d", "-aes-256-cbc",
+                                             "-pass", "fd:" ++ show x]
+           , cwd = Nothing
+           , env = Just []
+           , std_in = UseHandle inHandle
+           , std_out = CreatePipe
+           , std_err = Inherit
+           , close_fds = False
+           , create_group = False }
+     (Nothing, Just o, Nothing, p) <- createProcess cp
+     hPutStr h $ key ++ "\n"
+     hClose h
+     ec <- waitForProcess p
+     hClose inHandle
+     case ec of
+       ExitSuccess -> do dbStr <- hGetContents o
+                         deepseq dbStr $ hClose o
+                         return $ Just $ read dbStr
+       ExitFailure 1 -> do hClose o
+                           return Nothing
+       ExitFailure _ -> error "Fatal error: openssl died."
 
 listEntries :: DB -> IO String
 listEntries db = do
