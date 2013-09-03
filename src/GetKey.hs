@@ -103,6 +103,10 @@ getKey p =
      dialogCursor <- cursorNew LeftPtr
      dw <- widgetGetDrawWindow dialog
 
+     -- This loop isn't strictly necessary, but causes the window to be
+     -- created sooner on some systems.
+     loop
+
      grab 16 $ pointerGrab dw True [] (Nothing :: Maybe DrawWindow)
        (Just dialogCursor) currentTime
      grab 16 $ keyboardGrab dw True currentTime
