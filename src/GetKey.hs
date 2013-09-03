@@ -1,17 +1,30 @@
 module GetKey where
 
+import Control.Concurrent
 import Graphics.UI.Gtk hiding (get, add)
 import qualified Prompts as P
 import System.Exit
+import System.IO
+
+-- Most of this code is transliterated from libgksu.
+-- * Copyright (C) 2004-2009 Gustavo Noronha Silva
+-- * Portions Copyright (C) 2009 VMware, Inc.
+
+grab :: Int -> IO GrabStatus -> IO ()
+grab 0 _ = hPutStrLn stderr P.focusFail
+grab n f =
+  do status <- f
+     case status of
+       GrabSuccess -> return ()
+       _ ->
+         do hPutStrLn stderr P.focusRetry
+            threadDelay 250000
+            grab (n - 1) f
 
 loop :: IO ()
 loop = do b <- eventsPending
           if b > 0 then do _ <- mainIteration; loop
             else return ()
-
--- Most of this code is transliterated from libgksu.
--- * Copyright (C) 2004-2009 Gustavo Noronha Silva
--- * Portions Copyright (C) 2009 VMware, Inc.
 
 getKey :: P.Prompt -> IO String
 getKey p =
@@ -87,20 +100,12 @@ getKey p =
 
      -- TODO(sjindel): Dim screen.
      widgetShowAll dialog
-
-     -- We call loop here to make sure the @DrawWindow@ for the dialog is
-     -- created (and visible?) before grabbing focus. Without it, the pointer
-     -- focus seems to fail and only the keyboard focus is grabbed; probably
-     -- a race.
-     -- TODO(sjindel): Determine why this call to loop is necessary here
-     -- when it does not seem to be used in libgksu.
-     loop
-
      dialogCursor <- cursorNew LeftPtr
      dw <- widgetGetDrawWindow dialog
-     GrabSuccess <- pointerGrab dw True [] (Nothing :: Maybe DrawWindow)
-                    (Just dialogCursor) currentTime
-     GrabSuccess <- keyboardGrab dw True currentTime
+
+     grab 16 $ pointerGrab dw True [] (Nothing :: Maybe DrawWindow)
+       (Just dialogCursor) currentTime
+     grab 16 $ keyboardGrab dw True currentTime
      windowSetKeepAbove dialog True
 
      loop

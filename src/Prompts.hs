@@ -28,3 +28,9 @@ confirmPasswordPrompt = Prompt
   { message = "Confirm password"
   , alert = "Please re-enter the new password."
   }
+
+focusFail :: String
+focusFail = "Couldn't grab focus; proceeding anyway!"
+
+focusRetry :: String
+focusRetry = "Retrying focus grab..."
