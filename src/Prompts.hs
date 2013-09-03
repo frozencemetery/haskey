@@ -1,19 +1,30 @@
 module Prompts where
 
-keyPrompt :: String
-keyPrompt = "Enter keychain password."
+data Prompt = Prompt
+  { message :: String
+  , alert :: String
+  }
 
-tryAgainPrompt :: String
-tryAgainPrompt = "Incorrect password. Please try again."
+unlockPrompt :: Prompt
+unlockPrompt = Prompt
+  { message = "Unlock keychain"
+  , alert = "Please enter the password used to encrypt the keychain."
+  }
 
-newPrompt :: String
-newPrompt = "Enter new keychain password."
+tryAgainPrompt :: Prompt
+tryAgainPrompt = Prompt
+  { message = "Unlock keychain"
+  , alert = "Incorrect password. Please try again."
+  }
 
-confirmPrompt :: String
-confirmPrompt = "Confirm new keychain password."
+newPasswordPrompt :: Prompt
+newPasswordPrompt = Prompt
+  { message = "New password"
+  , alert = "Please enter the a new password to encrypt the keychain."
+  }
 
-passwordEntryPrompt :: String
-passwordEntryPrompt = "Password:"
-
-alertMessage :: String
-alertMessage = "Please enter the password used to encrypt the keychain."
+confirmPasswordPrompt :: Prompt
+confirmPasswordPrompt = Prompt
+  { message = "Confirm password"
+  , alert = "Please re-enter the new password."
+  }

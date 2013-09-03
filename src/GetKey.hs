@@ -1,6 +1,7 @@
 module GetKey where
 
 import Graphics.UI.Gtk hiding (get, add)
+import qualified Prompts as P
 import System.Exit
 
 loop :: IO ()
@@ -12,7 +13,7 @@ loop = do b <- eventsPending
 -- * Copyright (C) 2004-2009 Gustavo Noronha Silva
 -- * Portions Copyright (C) 2009 VMware, Inc.
 
-getKey :: String -> IO String
+getKey :: P.Prompt -> IO String
 getKey p =
   do _ <- initGUI
      dialog <- dialogNew
@@ -47,16 +48,17 @@ getKey p =
      widgetShow entryVbox
 
      label <- labelNew
-       $ Just $ "<span weight=\"bold\" size=\"larger\">" ++ p ++ "</span>\n"
+       $ Just $ "<span weight=\"bold\" size=\"larger\">" ++ P.message p
+         ++ "</span>\n"
      labelSetUseMarkup label True
      labelSetLineWrap label True
      miscSetAlignment label 0.0 0
      boxPackStart entryVbox label PackGrow 0
      widgetShow label
 
-     -- TODO(sjindel): Do something with the alert?
-     alert <- labelNew Nothing
+     alert <- labelNew $ Just $ P.alert p
      boxPackStart entryVbox alert PackGrow 0
+     widgetShow alert
 
      entryHbox <- hBoxNew False 6
      boxPackStart entryVbox entryHbox PackGrow 0
@@ -84,13 +86,21 @@ getKey p =
      -- TODO(sjindel): Verify capslock on focus-in-event.
 
      -- TODO(sjindel): Dim screen.
+     widgetShowAll dialog
+
+     -- We call loop here to make sure the @DrawWindow@ for the dialog is
+     -- created (and visible?) before grabbing focus. Without it, the pointer
+     -- focus seems to fail and only the keyboard focus is grabbed; probably
+     -- a race.
+     -- TODO(sjindel): Determine why this call to loop is necessary here
+     -- when it does not seem to be used in libgksu.
+     loop
+
      dialogCursor <- cursorNew LeftPtr
-     frame <- widgetGetRootWindow dialog
-     GrabSuccess <- pointerGrab frame True [] (Nothing :: Maybe DrawWindow)
-       (Just dialogCursor) currentTime
-     -- TODO(sindel): Figure out why the keyboard grab doesn't show the
-     -- cursor in the entry box.
-     _ <- keyboardGrab frame True currentTime
+     dw <- widgetGetDrawWindow dialog
+     GrabSuccess <- pointerGrab dw True [] (Nothing :: Maybe DrawWindow)
+                    (Just dialogCursor) currentTime
+     GrabSuccess <- keyboardGrab dw True currentTime
      windowSetKeepAbove dialog True
 
      loop
@@ -104,8 +114,6 @@ getKey p =
      loop
 
      case rid of
-       ResponseOk -> do key <- entryGetText entry
-                        widgetDestroy dialog
-                        loop
-                        return key
+       ResponseOk ->
+         do key <- entryGetText entry; widgetDestroy dialog; loop; return key
        _ -> exitWith $ ExitFailure 2

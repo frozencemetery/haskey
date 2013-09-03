@@ -15,7 +15,7 @@ version = "1.2hg"
 getDB :: Options -> String -> IO (String, DB)
 getDB opt loc =
   case optKey opt of
-    Nothing -> getDB' keyPrompt loc
+    Nothing -> getDB' unlockPrompt loc
     Just k ->
       do dbm <- openDB k loc
          case dbm of
@@ -88,13 +88,13 @@ main = do
          putStrLn key
     Just Rekey ->
       do (_, db) <- getDB opts dblocat
-         newKey1 <- getKey newPrompt
-         newKey2 <- getKey confirmPrompt
+         newKey1 <- getKey newPasswordPrompt
+         newKey2 <- getKey confirmPasswordPrompt
          if newKey1 == newKey2
            then writeDB newKey2 db dblocat
            else putStrLn $ "Sorry, new passwords did not match. "
                         ++ "No action performed."
 
     Just MakeDB ->
-      do key <- getKey newPrompt
+      do key <- getKey newPasswordPrompt
          makeDB key dblocat
