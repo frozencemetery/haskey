@@ -48,7 +48,7 @@ main = do
     Just Lookup ->
       do (_, db) <- getDB opts dblocat
          entry <- get db (optSelector opts) (optService opts) (optUser opts)
-         let entry' = maybe "no entry found" showdbent entry
+         let entry' = maybe "No entry found." showdbent entry
          let pword = case entry of Nothing -> ""; Just (_, _, p) -> p
          if optXOut opts then gen ":0" $ pword ++ "\n" else putStrLn entry'
     Just Create ->

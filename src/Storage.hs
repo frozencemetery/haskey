@@ -89,7 +89,6 @@ listEntries db =
   do let db' = intercalate "\n" $ map (\(x,_,_) -> x) db
      return db'
 
--- TODO: Prompt the user when multiple options are available.
 -- | Returns a DB entry with the specified service/username combination. If
 -- neither are specified, prompts the user for the service. Returns $Just e$ if
 -- a single entry @e@ was found; if no or multiple entries were found, returns
@@ -100,26 +99,36 @@ get :: DB
        -> Maybe String  -- ^ Username
        -> IO (Maybe DBent)
 get [] _ _ _ = return Nothing
-get db _ (Just service) _ =
-  case filter (\(s, _, _) -> s == service) db of
-    [ent] -> return $ Just ent
-    _ -> return Nothing
-get db _ _ (Just username) =
-  case filter (\(_, u, _) -> u == username) db of
-    [ent] -> return $ Just ent
-    _ -> return Nothing
 get db sel Nothing Nothing =
-  do serv <- select sel selectService (map (\(a,_,_) -> a) db)
+  -- Prompt for service before username.
+  do serv <- select sel selectService $ nub $ map (\(s, _, _) -> s) db
      get db sel (Just serv) Nothing
+get db sel Nothing (Just user) =
+  case filter (\(_, u, _) -> u == user) db of
+    [] -> return Nothing
+    -- We don't automatically choose a service when it's unambiguous.
+    db' -> do serv <- select sel selectService $ nub $ map (\(s, _, _) -> s) db'
+              get db' sel (Just serv) (Just user)
+get db sel (Just serv) Nothing =
+  case filter (\(s, _, _) -> s == serv) db of
+    [] -> return Nothing
+    [ent] -> return $ Just ent
+    db' -> do user <- select sel selectUser $ nub $ map (\(_, u, _) -> u) db'
+              get db' sel (Just serv) (Just user)
+get db _ (Just serv) (Just user) =
+  case filter (\(s, u, _) -> s == serv && u == user) db of
+    [] -> return Nothing
+    [ent] -> return $ Just ent
+    _ -> error "Fatal error: duplicate (service, user) pair found in DB."
 
 -- the Bool represents sharing
 -- by which I mean whether it overwrote
 add :: Key -> FilePath -> DB -> String -> String -> String -> IO Bool
 add key dblocat db s u p =
-  do let (b, db') = partition (\(x,_,_) -> x == s) db
+  do let (b, db') = partition (\(serv,user,_) -> serv == s && user == u) db
      let newdb = (s, u, p) : db'
      writeDB key newdb dblocat
-     return $ length b == 1
+     return $ length b >= 1
 
 del :: Key
        -> FilePath  -- ^ DB location
