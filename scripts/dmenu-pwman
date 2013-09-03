@@ -1,3 +1,6 @@
 #!/bin/bash
-PSWD="$(pwman --echokey)"
-pwman -k${PSWD} -x -l -s"$(pwman -k"${PSWD}" -L | dmenu)"
+
+# Deprecated, please call pwman directly instead of using this script. It will
+# be removed in a future release.
+
+pwman -x -l --selector=dmenu

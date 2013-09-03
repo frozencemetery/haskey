@@ -47,7 +47,7 @@ main = do
          putStrLn entries
     Just Lookup ->
       do (_, db) <- getDB opts dblocat
-         entry <- get db (optService opts) (optUser opts) (optPassword opts)
+         entry <- get db (optSelector opts) (optService opts) (optUser opts)
          let entry' = maybe "no entry found" showdbent entry
          let pword = case entry of Nothing -> ""; Just (_, _, p) -> p
          if optXOut opts then gen ":0" $ pword ++ "\n" else putStrLn entry'
@@ -56,8 +56,7 @@ main = do
          sname <- case optService opts of Just k -> return k
                                           Nothing -> do putStr "Service:  "
                                                         hFlush stdout
-                                                        a <- getLine
-                                                        return a
+                                                        getLine
          r <- newStdGen
          uname <- case optUser opts of
                     Just k -> return k
@@ -79,13 +78,10 @@ main = do
                    False -> putStrLn "Added."
     Just Delete ->
       do (key, db) <- getDB opts dblocat
-         killp <- del key dblocat db (optService opts) (optUser opts)
-                      (optPassword opts)
+         killp <- del key dblocat db (optSelector opts) (optService opts)
+                  (optUser opts)
          case killp of True -> putStrLn "Deleted."
                        False -> putStrLn "No entries matched to delete."
-    Just Echo ->
-      do (key, _) <- getDB opts dblocat
-         putStrLn key
     Just Rekey ->
       do (_, db) <- getDB opts dblocat
          newKey1 <- getKey newPasswordPrompt
@@ -94,7 +90,6 @@ main = do
            then writeDB newKey2 db dblocat
            else putStrLn $ "Sorry, new passwords did not match. "
                         ++ "No action performed."
-
     Just MakeDB ->
       do key <- getKey newPasswordPrompt
          makeDB key dblocat

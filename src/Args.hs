@@ -3,7 +3,7 @@ module Args where
 import Data.Maybe
 import System.Console.GetOpt
 
-data Action = Create | Lookup | Delete | List | Echo | Rekey | MakeDB
+data Action = Create | Lookup | Delete | List | Rekey | MakeDB
 
 data Options = Options { optShowVersion :: Bool
                        , optShowLicense :: Bool
@@ -16,6 +16,7 @@ data Options = Options { optShowVersion :: Bool
                        , optAction :: Maybe Action
                        , optDBlocat :: FilePath
                        , optXOut :: Bool
+                       , optSelector :: Maybe String
                        }
 
 defaultOptions :: FilePath -> Options
@@ -30,6 +31,7 @@ defaultOptions home = Options { optShowVersion = False
                               , optAction = Nothing
                               , optDBlocat = home ++ "/.pw.db"
                               , optXOut = False
+                              , optSelector = Nothing
                               }
 
 options :: FilePath -> [OptDescr (Options -> Options)]
@@ -84,13 +86,14 @@ options home = [ Option ['v'] ["version"]
           , Option [] ["delete"] -- do not bind a shortarg to this command
                      (NoArg (\opts -> opts { optAction = Just Delete }))
                      "delete an entry"
-          , Option [] ["echokey"] -- do not bind a shortarg to this command
-                     (NoArg (\opts -> opts { optAction = Just Echo }))
-                     "request, check, and echo key pass"
           , Option ['d'] ["dblocat"]
                      (OptArg ((\f opts -> opts { optDBlocat = f})
                               . fromMaybe (home ++ "/.pw.db")) "FILE")
                      "location of database (defaults to ~/.pw.db)"
+          , Option [] ["selector"]
+                     (OptArg ((\f opts -> opts { optSelector = Just f})
+                              . fromMaybe "dmenu") "SELECTORCOMMAND")
+                      "command to select service/username (must be like dmenu)"
           ]
 
 compilerOpts :: [String] -> FilePath -> IO (Options, [String])
