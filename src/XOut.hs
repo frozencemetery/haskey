@@ -1,6 +1,7 @@
 module XOut where
 
 import Control.Concurrent
+import Control.Monad
 import Data.List
 import Graphics.X11
 import Graphics.X11.XTest
@@ -36,6 +37,7 @@ mapkey '/' = ([], xK_slash)
 mapkey '?' = ([xK_Shift_R], xK_question)
 mapkey ' ' = ([], xK_space)
 mapkey '\n' = ([], xK_Return)
+mapkey '\t' = ([], xK_Tab)
 mapkey '>' = ([xK_Shift_R], xK_greater)
 mapkey '<' = ([], xK_less) -- no shift here is correct (why?)
 -- doing this with parenleft breaks qemu integration
@@ -56,12 +58,18 @@ mapkey c
           numkeys = [xK_0..xK_9]
 mapkey c = error $ "No map for key: " ++ [c]
 
--- this is modeled from the example and needs some cleanup
-gen :: String -> String -> IO ()
-gen display str = do
-  display' <- openDisplay display
-  Just _ <- queryXTestSupport display' -- this line
-  let str' = map mapkey str
-  let res = map (\x -> sendKey display' (fst x) (snd x)) str' :: [IO ()]
-  let res' = foldl (\x y -> x >> (threadDelay 1000) >> y) (return ()) res :: IO ()
-  res'
+gen :: String  -- ^ screen to output to
+       -> Int  -- ^ delay before typing (in milliseconds)
+       -> Bool  -- ^ whether to use confirm mode
+       -> Bool  -- ^ whether to press return after typing the password
+       -> String  -- ^ password
+       -> IO ()
+gen display delay confirm ret str =
+  do threadDelay (delay * 1000)
+     display' <- openDisplay display
+     let keys = sequence_ $ intersperse (threadDelay 1000) 
+                $ map (uncurry (sendKey display') . mapkey) str
+     Just _ <- queryXTestSupport display' -- this line
+     keys
+     when confirm $ uncurry (sendKey display') (mapkey '\t') >> keys
+     when ret $ uncurry (sendKey display') (mapkey '\n')

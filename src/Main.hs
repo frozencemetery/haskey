@@ -50,7 +50,9 @@ main = do
          entry <- get db (optSelector opts) (optService opts) (optUser opts)
          let entry' = maybe "No entry found." showdbent entry
          let pword = case entry of Nothing -> ""; Just (_, _, p) -> p
-         if optXOut opts then gen ":0" $ pword ++ "\n" else putStrLn entry'
+         if optXOut opts then gen ":0" (optDelay opts) (optConfirm opts) 
+                              (optReturn opts) pword
+           else putStrLn entry'
     Just Create ->
       do (key, db) <- getDB opts dblocat
          sname <- case optService opts of Just k -> return k
