@@ -10,7 +10,7 @@ import System.Random
 import XOut
 
 version :: String
-version = "1.2hg"
+version = "2.0.0"
 
 getDB :: Options -> String -> IO (String, DB)
 getDB opt loc =

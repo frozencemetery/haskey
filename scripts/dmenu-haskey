@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Deprecated, please call haskey directly instead of using this script. It
+# will be removed in a future release.
+
+haskey -x -l --selector=dmenu

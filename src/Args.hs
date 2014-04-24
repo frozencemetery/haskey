@@ -130,7 +130,7 @@ readDelay d = read $ fromMaybe (error "Must supply delay with --delay.") d
 
 compilerOpts :: [String] -> FilePath -> IO (Options, [String])
 compilerOpts argv home =
-   let header = "Usage: pwman [Option...] files..."
+   let header = "Usage: haskey [Option...] files..."
    in case getOpt Permute (options home) argv of
         (o, n, []) ->
           return (foldl (flip id) (defaultOptions home) o, n)

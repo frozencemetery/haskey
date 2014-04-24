@@ -1,4 +1,4 @@
-Name:           pwman
+Name:           haskey
 Version:        1.2
 Synopsis:       Password management
 Author:         frozencemetery
@@ -7,7 +7,7 @@ Category:       Utilities
 Build-type:     Simple
 Cabal-version:  >=1.2
 
-Executable pwman
+Executable haskey
   Main-Is:              Main.hs
   Hs-Source-Dirs:       src
   Build-Depends:        base, random, xtest, X11, gtk, unix, process, deepseq

@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# Deprecated, please call pwman directly instead of using this script. It will
-# be removed in a future release.
-
-pwman -x -l --selector=dmenu

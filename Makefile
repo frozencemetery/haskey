@@ -1,10 +1,10 @@
-default: pwman
+default: haskey
 
-pwman:
+haskey:
 	runhaskell Setup.hs build
 
 install:
-	cp dist/build/pwman/pwman /usr/local/bin/.
+	cp dist/build/haskey/haskey /usr/local/bin/.
 	cp scripts/* /usr/local/bin/.
 
 clean:
