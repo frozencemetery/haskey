@@ -1,10 +1,11 @@
 module GetKey where
 
 import Control.Concurrent
-import Graphics.UI.Gtk hiding (get, add)
-import qualified Prompts as P
+import Graphics.UI.Gtk
 import System.Exit
 import System.IO
+
+import qualified Prompts as P
 
 -- Most of this code is transliterated from libgksu.
 -- * Copyright (C) 2004-2009 Gustavo Noronha Silva

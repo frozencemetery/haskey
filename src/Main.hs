@@ -1,16 +1,17 @@
-import Args
 import Control.Monad
+import System.Environment
+import System.IO
+import System.Random
+
+import Args
 import GetKey
 import Prompts
 import Pwgen
 import Storage
-import System.Environment
-import System.IO
-import System.Random
 import XOut
 
 version :: String
-version = "2.0.0"
+version = "2.0.1"
 
 getDB :: Options -> String -> IO (String, DB)
 getDB opt loc =

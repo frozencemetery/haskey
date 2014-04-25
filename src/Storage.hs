@@ -15,11 +15,12 @@ module Storage
 import Control.DeepSeq
 import Data.List
 import GHC.IO.Exception
+import System.IO
+import System.Posix.IO
+import System.Process
+
 import Prompts
 import Selection
-import System.IO
-import System.Process
-import System.Posix.IO
 
 type Key = String
 
