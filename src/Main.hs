@@ -11,7 +11,7 @@ import Storage
 import XOut
 
 version :: String
-version = "2.0.1"
+version = "2.0.2"
 
 getDB :: Options -> String -> IO (String, DB)
 getDB opt loc =
