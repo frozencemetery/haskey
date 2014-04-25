@@ -121,7 +121,7 @@ options home =
     ("type the password twice, pressing tab in between (for use with -x)")
     
   , Option [] ["noreturn"]
-    (OptArg (\f opts -> opts { optReturn = False }) "NORETURN")
+    (OptArg (\_ opts -> opts { optReturn = False }) "NORETURN")
     ("do not press return after typing the password (for use with -x)")
   ]
 
