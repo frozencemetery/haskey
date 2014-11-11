@@ -1,2 +1,6 @@
 #!/bin/sh
-runhaskell Setup.hs configure
+if [[ -z "$(which cabal)" ]]; then
+    echo "cabal executable not found in path!"
+    exit 1
+fi
+cabal configure

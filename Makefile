@@ -1,10 +1,10 @@
 default: haskey
 
 haskey:
-	runhaskell Setup.hs build
+	cabal build
 
 install:
-	cp dist/build/haskey/haskey /usr/local/bin/.
+	cabal install
 	cp scripts/* /usr/local/bin/.
 
 clean:
