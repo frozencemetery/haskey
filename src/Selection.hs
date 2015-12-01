@@ -28,6 +28,7 @@ select (Just command) _ opts =
            , close_fds = True  -- The process should not need access to any of our
                                -- file descriptors.
            , create_group = False  -- TODO(sjindel): Should we make this true?
+           , delegate_ctlc = False
            }
      (Just i, Just o, Nothing, p) <- createProcess cp
      _ <- mapM (hPutStrLn i) opts

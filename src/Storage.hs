@@ -46,7 +46,9 @@ writeDB key db dblocat =
            , std_out = UseHandle outHandle
            , std_err = Inherit
            , close_fds = False
-           , create_group = False }
+           , create_group = False
+           , delegate_ctlc = False
+           }
      (Just i, Nothing, Nothing, p) <- createProcess cp
      hPutStrLn i $ show db
      hClose i
@@ -71,7 +73,9 @@ openDB key dblocat =
            , std_out = CreatePipe
            , std_err = Inherit
            , close_fds = False
-           , create_group = False }
+           , create_group = False
+           , delegate_ctlc = False
+           }
      (Nothing, Just o, Nothing, p) <- createProcess cp
      hPutStr h $ key ++ "\n"
      hClose h
