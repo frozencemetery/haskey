@@ -17,7 +17,7 @@ import Data.List
 import GHC.IO.Exception
 import System.IO
 import System.Posix.IO
-import System.Process
+import System.Process hiding (createPipe)
 
 import Prompts
 import Selection
