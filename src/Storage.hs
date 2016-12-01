@@ -48,6 +48,11 @@ writeDB key db dblocat =
            , close_fds = False
            , create_group = False
            , delegate_ctlc = False
+           , detach_console = False -- I don't Windows
+           , create_new_console = False -- I don't Windows
+           , new_session = False
+           , child_group = Nothing
+           , child_user = Nothing
            }
      (Just i, Nothing, Nothing, p) <- createProcess cp
      hPutStrLn i $ show db
@@ -75,6 +80,11 @@ openDB key dblocat =
            , close_fds = False
            , create_group = False
            , delegate_ctlc = False
+           , detach_console = False -- I don't Windows
+           , create_new_console = False -- I don't Windows
+           , new_session = False
+           , child_group = Nothing
+           , child_user = Nothing
            }
      (Nothing, Just o, Nothing, p) <- createProcess cp
      hPutStr h $ key ++ "\n"
