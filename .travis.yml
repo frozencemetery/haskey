@@ -1,5 +1,15 @@
-language: haskell
-before_install:
- - sudo apt-get install -y libxtst-dev
- - cabal install cabal-install
- - cabal install gtk2hs-buildtools
+# Travis doesn't package ghc-8.0
+
+sudo: required
+services:
+  - docker
+
+# specifying language here breaks Travis
+
+script:
+  - >
+    docker run
+    -v `pwd`:/tmp/build
+    -w /tmp/build
+    debian:sid
+    /bin/bash -ex .travis.sh
