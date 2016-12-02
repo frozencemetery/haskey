@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/frozencemetery/haskey.svg?branch=master)](https://travis-ci.org/frozencemetery/haskey)
+#+CAPTION: Build Status
+[[https://travis-ci.org/frozencemetery/haskey][file:https://travis-ci.org/frozencemetery/haskey.svg?branch=master]]
 
 * haskey
 
