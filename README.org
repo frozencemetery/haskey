@@ -1,0 +1,29 @@
+[![Build Status](https://travis-ci.org/frozencemetery/haskey.svg?branch=master)](https://travis-ci.org/frozencemetery/haskey)
+
+* haskey
+
+haskey is a password management tool, by which I mean it supports password
+creation, storage, and entry.  There is a CLI, and an X11 interface.  
+
+Haskey calls directly into X11 to "type" passwords, which means that at no
+point are passwords visible through the paste buffer.  They also can be
+easily entered into virtual machines, making sandboxing even easier.
+
+** errata
+
+Please note: if you created your password database with a version of OpenSSL
+prior to 1.1.0b, they have changed their digest since then.  To recreate it,
+you will need to open with the old paramter and save it.  This can be
+accomplished using something like the following:
+
+#+BEGIN_SRC sh
+  mv ~/.pw.db ~/.pw.db.old_openssl
+  openssl enc -d -aes-256-cbc -md md5 -in ~/.pw.db.old_openssl | \
+      openssl enc -aes-256-cbc -md sha256 -out ~/.pw.db
+#+END_SRC
+
+This will create a new database without ever putting the cleartext database on
+disk, or having it visible in the process tree.  However, its prompts are
+somewhat confusing: it will ask for first the old password, then the new
+password, and then the new password again.  (There are other ways of doing it,
+with varying degrees of leakage and ease.  I leave it up to you.)
