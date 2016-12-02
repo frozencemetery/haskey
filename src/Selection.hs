@@ -25,10 +25,14 @@ select (Just command) _ opts =
            , std_in = CreatePipe
            , std_out = CreatePipe
            , std_err = Inherit
-           , close_fds = True  -- The process should not need access to any of our
-                               -- file descriptors.
-           , create_group = False  -- TODO(sjindel): Should we make this true?
+           , close_fds = True
+           , create_group = False
            , delegate_ctlc = False
+           , detach_console = False -- I don't Windows
+           , create_new_console = False -- I don't Windows
+           , new_session = False
+           , child_group = Nothing
+           , child_user = Nothing
            }
      (Just i, Just o, Nothing, p) <- createProcess cp
      _ <- mapM (hPutStrLn i) opts
