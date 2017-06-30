@@ -1,3 +1,4 @@
+import Control.DeepSeq
 import Control.Monad
 import System.Environment
 import System.IO
@@ -33,7 +34,8 @@ main :: IO ()
 main = do
   args <- getArgs
   home <- getEnv "HOME"
-  (opts, _) <- compilerOpts args home
+  (opts_precursor, _) <- compilerOpts args home
+  let opts = force opts_precursor
 
   let dblocat = optDBlocat opts
 

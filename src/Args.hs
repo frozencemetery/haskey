@@ -1,9 +1,18 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Args where
 
 import Data.Maybe
-import System.Console.GetOpt
+import System.Console.GetOpt -- here's getopt
+
+-- and here are the things to make getopt work right (#10)
+import Control.DeepSeq
+import Control.DeepSeq.Generics (genericRnf)
+import GHC.Generics
 
 data Action = Create | Lookup | Delete | List | Rekey | MakeDB
+  deriving Generic
+instance NFData Action where rnf = genericRnf
 
 data Options =
   Options { optShowVersion :: Bool
@@ -22,6 +31,8 @@ data Options =
           , optReturn :: Bool
           , optConfirm :: Bool
           }
+  deriving Generic
+instance NFData Options where rnf = genericRnf
 
 defaultOptions :: FilePath -> Options
 defaultOptions home =
