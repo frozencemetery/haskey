@@ -1,6 +1,9 @@
 #+CAPTION: Build Status
 [[https://travis-ci.org/frozencemetery/haskey][file:https://travis-ci.org/frozencemetery/haskey.svg?branch=master]]
 
+Haskey is archived and this repository exists for reference purposes only.
+The data format was an openssl-encrypted (aes-256-cbc) file.
+
 * haskey
 
 haskey is a password management tool, by which I mean it supports password
